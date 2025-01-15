@@ -38,12 +38,15 @@ impl DigitalSignature<BLSSecretKey, BLSPublicKey> for BLS {
     }
 
     fn verify(pk: &BLSPublicKey, signature: &[u8], message: &[u8]) -> Result<bool, &'static str> {
-        if signature.len() != 48 {
-            return Err("Invalid signature size.");
-        }
+        let sigma: [u8; 48] = match signature.try_into() {
+            Ok(x) => x,
+            Err(_) => return Err("Invalid signature size."),
+        };
 
-        let sigma: [u8; 48] = signature.try_into().unwrap(); // TO-FIX
-        let sigma = G1Affine::from_compressed(&sigma).unwrap(); // TO-FIX
+        let sigma = match G1Affine::from_compressed(&sigma).into_option() {
+            Some(x) => x,
+            None => return Err("Error while parsing signature."),
+        };
 
         let h = G1Projective::hash_to_curve(&message, CSUITE, &[]).to_affine();
 
@@ -63,7 +66,6 @@ mod test {
     use crate::traits::ds::DigitalSignature;
 
     use super::BLS;
-
 
     #[test]
     fn bls_gen_failes_on_wrong_sec_level() {
@@ -90,5 +92,4 @@ mod test {
         let b = BLS::verify(&pk, &s, m2).unwrap();
         assert!(b);
     }
-
 }
