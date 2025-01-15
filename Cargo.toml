@@ -11,3 +11,7 @@ rand_core = { version = "0.6.4", features = ["getrandom"] }
 
 [dev-dependencies]
 divan = "0.1.17"
+
+[[bench]]
+name = "bls"
+harness = false
