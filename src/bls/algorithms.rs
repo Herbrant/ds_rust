@@ -13,7 +13,10 @@ const CSUITE: &[u8] = b"BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_";
 
 pub struct BLS;
 
-impl DigitalSignature<BLSSecretKey, BLSPublicKey> for BLS {
+impl DigitalSignature for BLS {
+    type SecretKey = BLSSecretKey;
+    type PublicKey = BLSPublicKey;
+
     fn keygen(sec_level: u64) -> Result<(BLSSecretKey, BLSPublicKey), &'static str> {
         if sec_level != 100 {
             return Err("The implementation supports only the BLS12_381 curve, which supports approximately 100-bit security.");
